@@ -1,25 +1,29 @@
 -- Function to send a chat message to all players
-local function Chat(message)
-    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(message, "All")
+local -- Function to send a chat message to all players
+local function SendChatMessage(message)
+    local chatService = game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents
+    local success, errorMsg = pcall(chatService.SayMessageRequest.FireServer, chatService.SayMessageRequest, message, "All")
+    if not success then
+        warn("Failed to send chat message:", errorMsg)
+    end
 end
 
--- Load Rizz lines from URL
+-- Load Rizz lines and UI library from URLs
 local Rizz_Lines = loadstring(game:HttpGet("https://raw.githubusercontent.com/RobloxScriptPoster/Rizz/main/Auto-update"))()
-
--- Load UI library
 local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/RobloxScriptPoster/Rizz/main/Ui"))()
 
 -- Create the UI window
 local Rizz_Main = lib:Window("Rizzer")
 
 -- Add UI elements
-local linePickerDropdown = Rizz_Main:Dropdown("Line Picker", Rizz_Lines, function(line)
-    getgenv().line2 = tostring(line)
+local linePickerDropdown = Rizz_Main:Dropdown("Line Picker", Rizz_Lines, function(selectedLine)
+    getgenv().selectedLine = tostring(selectedLine)
 end, true)
 
-Rizz_Main:Button("Rizz", function() 
-    if getgenv().line2 then
-        Chat(getgenv().line2)
+Rizz_Main:Button("Rizz", function()
+    local selectedLine = getgenv().selectedLine
+    if selectedLine then
+        SendChatMessage(selectedLine)
     else
         warn("No line selected!")
     end
